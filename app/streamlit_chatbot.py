@@ -27,8 +27,8 @@ chain = build_chain()
 
 # Streamlit UI
 st.set_page_config(page_title="Naive RAG Chatbot", layout="centered")
-st.title("🧠 Naive RAG Chatbot")
-st.markdown("Ask a question based on your documents. Powered by HuggingFace (`flan-t5-base`).")
+st.title("🧠 Naive RAG Chatbot- Agriculture")
+st.markdown("Ask a question about agriculture. Powered by HuggingFace (`flan-t5-base`).")
 
 query = st.text_input("🔍 Your question:")
 
