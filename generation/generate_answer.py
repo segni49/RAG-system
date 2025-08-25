@@ -1,12 +1,13 @@
 # generation/generate_answer.py
 
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain_community.chat_models import ChatOllama
+from langchain_core.runnables import RunnableSequence
+from langchain.llms import HuggingFaceHub
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
 from typing import List
+import streamlit as st
 
 def format_context(docs: List[Document]) -> str:
     """
@@ -32,21 +33,25 @@ Question:
 """
     )
 
-def build_chain(model_name: str = "tinyllama", temperature: float = 0.3) -> LLMChain:
+def build_chain() -> RunnableSequence:
     """
-    Constructs an LLMChain using a local Ollama model and the grounded prompt.
+    Constructs a LangChain Expression Language (LCEL) chain using HuggingFaceHub.
     """
-    llm = ChatOllama(model=model_name, temperature=temperature)
+    llm = HuggingFaceHub(
+        repo_id="google/flan-t5-base",
+        huggingfacehub_api_token=st.secrets["huggingface"]["token"],
+        model_kwargs={"temperature": 0.3, "max_length": 512}
+    )
     prompt = build_prompt()
-    return LLMChain(llm=llm, prompt=prompt)
+    return prompt | llm
 
-def generate_answer(vectorstore: FAISS, query: str, llm_chain: LLMChain, k: int = 3) -> str:
+def generate_answer(vectorstore: FAISS, query: str, chain: RunnableSequence, k: int = 3) -> str:
     """
-    Retrieves context and generates an answer using the LLM chain.
+    Retrieves context and generates an answer using the LCEL chain.
     """
     retrieved_docs = vectorstore.similarity_search(query, k=k)
     context = format_context(retrieved_docs)
-    return llm_chain.run({"context": context, "question": query})
+    return chain.invoke({"context": context, "question": query})
 
 if __name__ == "__main__":
     embedding_model = HuggingFaceEmbeddings(
@@ -60,9 +65,8 @@ if __name__ == "__main__":
         allow_dangerous_deserialization=True
     )
 
-    llm_chain = build_chain(model_name="tinyllama", temperature=0.3)
-
+    chain = build_chain()
     query = "What is backpropagation in neural networks?"
-    answer = generate_answer(vectorstore, query, llm_chain)
+    answer = generate_answer(vectorstore, query, chain)
 
     print(f"\n🧠 Answer:\n{answer}")
