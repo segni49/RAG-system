@@ -2,7 +2,7 @@
 
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
-from langchain.llms import HuggingFaceEndpoint
+from langchain_huggingface import HuggingFaceEndpoint  # ✅ Correct import
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
@@ -30,7 +30,8 @@ Question:
 def build_chain() -> RunnableSequence:
     prompt = build_prompt()
     llm = HuggingFaceEndpoint(
-        endpoint_url="https://api-inference.huggingface.co/models/google/flan-t5-base",
+        repo_id="google/flan-t5-base",
+        task="text2text-generation",  # ✅ Required for this model
         huggingfacehub_api_token=st.secrets["huggingface"]["token"],
         temperature=0.3,
         max_new_tokens=512
@@ -41,21 +42,3 @@ def generate_answer(vectorstore: FAISS, query: str, chain: RunnableSequence, k: 
     retrieved_docs = vectorstore.similarity_search(query, k=k)
     context = format_context(retrieved_docs)
     return chain.invoke({"context": context, "question": query})
-
-if __name__ == "__main__":
-    embedding_model = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/paraphrase-MiniLM-L3-v2",
-        model_kwargs={"device": "cpu"}
-    )
-
-    vectorstore = FAISS.load_local(
-        "rag_project/vectorstore",
-        embeddings=embedding_model,
-        allow_dangerous_deserialization=True
-    )
-
-    chain = build_chain()
-    query = "What is backpropagation in neural networks?"
-    answer = generate_answer(vectorstore, query, chain)
-
-    print(f"\n🧠 Answer:\n{answer}")
