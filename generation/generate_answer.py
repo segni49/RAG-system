@@ -2,7 +2,7 @@
 
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
-from langchain.llms import HuggingFaceHub
+from langchain.llms import HuggingFaceEndpoint
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
@@ -29,9 +29,8 @@ Question:
 
 def build_chain() -> RunnableSequence:
     prompt = build_prompt()
-    llm = HuggingFaceHub(
-        repo_id="google/flan-t5-base",
-        task="text2text-generation",  # ✅ Required to avoid ValidationError
+    llm = HuggingFaceEndpoint(
+        endpoint_url="https://api-inference.huggingface.co/models/google/flan-t5-base",
         huggingfacehub_api_token=st.secrets["huggingface"]["token"],
         model_kwargs={"temperature": 0.3, "max_new_tokens": 512}
     )
