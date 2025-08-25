@@ -1,4 +1,8 @@
 # app/streamlit_chatbot.py
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 import streamlit as st
 from generation.generate_answer import build_chain, generate_answer
