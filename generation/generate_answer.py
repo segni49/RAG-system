@@ -31,6 +31,7 @@ def build_chain() -> RunnableSequence:
     prompt = build_prompt()
     llm = HuggingFaceHub(
         repo_id="google/flan-t5-base",
+        task="text2text-generation",  # ✅ Required to avoid ValidationError
         huggingfacehub_api_token=st.secrets["huggingface"]["token"],
         model_kwargs={"temperature": 0.3, "max_new_tokens": 512}
     )
