@@ -31,7 +31,7 @@ def build_chain() -> RunnableSequence:
     prompt = build_prompt()
     llm = HuggingFaceEndpoint(
         repo_id="google/flan-t5-base",
-        task="text2text-generation",  # ✅ Required for this model
+        task="text2text-generation",
         huggingfacehub_api_token=st.secrets["huggingface"]["token"],
         temperature=0.3,
         max_new_tokens=512
