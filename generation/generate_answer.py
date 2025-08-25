@@ -10,15 +10,9 @@ from typing import List
 import streamlit as st
 
 def format_context(docs: List[Document]) -> str:
-    """
-    Combines retrieved documents into a single context string.
-    """
     return "\n\n".join(doc.page_content for doc in docs)
 
 def build_prompt() -> PromptTemplate:
-    """
-    Creates a prompt that forces the model to stay grounded in context.
-    """
     return PromptTemplate(
         input_variables=["context", "question"],
         template="""
@@ -34,21 +28,15 @@ Question:
     )
 
 def build_chain() -> RunnableSequence:
-    """
-    Constructs a LangChain Expression Language (LCEL) chain using HuggingFaceHub.
-    """
+    prompt = build_prompt()
     llm = HuggingFaceHub(
         repo_id="google/flan-t5-base",
         huggingfacehub_api_token=st.secrets["huggingface"]["token"],
-        model_kwargs={"temperature": 0.3, "max_length": 512}
+        model_kwargs={"temperature": 0.3, "max_new_tokens": 512}
     )
-    prompt = build_prompt()
     return prompt | llm
 
 def generate_answer(vectorstore: FAISS, query: str, chain: RunnableSequence, k: int = 3) -> str:
-    """
-    Retrieves context and generates an answer using the LCEL chain.
-    """
     retrieved_docs = vectorstore.similarity_search(query, k=k)
     context = format_context(retrieved_docs)
     return chain.invoke({"context": context, "question": query})

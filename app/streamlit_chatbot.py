@@ -9,23 +9,23 @@ from generation.generate_answer import build_chain, generate_answer
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 
-# ✅ Load embedding model
+# Load embedding model
 embedding_model = HuggingFaceEmbeddings(
     model_name="sentence-transformers/paraphrase-MiniLM-L3-v2",
     model_kwargs={"device": "cpu"}
 )
 
-# ✅ Load FAISS vectorstore
+# Load FAISS vectorstore
 vectorstore = FAISS.load_local(
     "rag_project/vectorstore",
     embeddings=embedding_model,
     allow_dangerous_deserialization=True
 )
 
-# ✅ Build HuggingFaceHub chain
+# Build HuggingFaceHub chain
 chain = build_chain()
 
-# ✅ Streamlit UI
+# Streamlit UI
 st.set_page_config(page_title="Naive RAG Chatbot", layout="centered")
 st.title("🧠 Naive RAG Chatbot")
 st.markdown("Ask a question based on your documents. Powered by HuggingFaceHub (`flan-t5-base`).")
